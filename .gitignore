@@ -1,0 +1,2 @@
+#ignoro il file node_modules che non è necessario ed è pesante
+node_modules/ 
