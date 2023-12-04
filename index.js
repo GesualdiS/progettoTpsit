@@ -1,41 +1,24 @@
-const express = require('express');
-const app = express();
-const dbRouter = require("./routes/user.js")
+//   +-------------------------------------------------+
+//   |   I require the modules that I'm going to use   |
+//   +-------------------------------------------------+
 
-app.use('/api', dbRouter)
+const express = require('express')
+const api = require('./routes/api.js')
+require('dotenv').config();
+const app = express()
 
-// Definisci le route per le pagine
-app.get('/', (req, res) => {
-    res.sendFile('login.html', {root: __dirname + '/public'});
-});
+//   +-------------------------------------------------+
+//   |   I take the variables store in the file .env   |
+//   +-------------------------------------------------+
 
-app.get('/login', (req, res) => {
-    res.sendFile('login.html', {root: __dirname + '/public'});
-});
+const port = process.env.PORT || 3000;
+const apiKey = process.env.API_KEY;
 
-app.get('/signup', (req, res) => {
-    res.sendFile('login.html', {root: __dirname + '/public'});
-});
+//   +--------------------------------------------------+
+//   |   I start to write the code for the web server   |
+//   +--------------------------------------------------+
 
-app.get('/erroreLogin', (req, res) => {
-    res.sendFile('loginErrato.html', {root: __dirname + '/public'});
-});
+// I use the code that is stored in ./routes/api.js for the links under api/*
+app.use('/api', api)
 
-app.get('/erroreSignup', (req, res) => {
-    res.sendFile('SignupErrato.html', {root: __dirname + '/public'});
-});
-
-app.get('/style.css', (req, res) => {
-    res.sendFile('style.css', {root: __dirname + '/public'});
-});
-
-app.get('/script.js', (req, res) => {
-    res.sendFile('script.js', {root: __dirname + '/public'});
-});
-
-app.all('*', (req, res) => {
-    res.sendFile('error404.html', {root: __dirname + '/public'});
-})
-
-app.listen(3000);
-
+app.listen(port)
