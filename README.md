@@ -26,6 +26,12 @@ Funzionalità implementate fin'ora:
 - poter creare un utente;
 - poter cambiare la password o la email dell'utente;
 - poter eliminare un utente;
+- cryptare la password quando arriva per poi salvarla nel database;
 
+Cose da fare
 
-
+Note:
+- ho cambiato da or in and questa condizione
+    else if(results.affectedRows == 1 && await bcrypt.compare(oldPassword, results[0].password))
+  verificare che non dà errore a casa
+- verificare updateUserPassword;

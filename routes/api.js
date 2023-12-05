@@ -65,14 +65,14 @@ router.put('/updateUserPassword', async (req, res) => {
             if (err) {
                 console.error('Error during the query:', err);
                 return res.status(500).send('Internal Server Error');
-            }else if(results.affectedRows == 1 || await bcrypt.compare(oldPassword, results[0].password)){
+            }else if(results.affectedRows == 1 && await bcrypt.compare(oldPassword, results[0].password)){
                 db.query(`UPDATE Users SET password = ? WHERE email = ?;`, [await cryptPassword(newPassword), email], (err, results, fields) => {
                     if(results.affectedRows !== 1) res.status(400).json({result: 'Email or password wrong'});
                     else if(err){
                         res.status(500).json({result: 'Internal Server Error'});
                         console.log('Error during the query')
                     } 
-                    else res.status(200).json({result: 'User updated'});
+                    else res.status(200).json({result: 'User password updated'});
                 })
             }else
                 res.status(400).json({result: 'Wrong credentials'});            
@@ -84,13 +84,30 @@ router.put('/updateUserPassword', async (req, res) => {
     
 })
 
-router.put('/updateUserEmail', (req, res) => {
+router.put('/updateUserEmail', async (req, res) => {
     const {oldEmail, newEmail, password} = req.body
-    db.query(`UPDATE Users SET email = ? WHERE email = ? AND password = ?;`, [newEmail, oldEmail, password], (err, results, fields) => {
-        if(results.affectedRows !== 1) console.log(`Email or password wrong`)
-        else if(err) console.log('Error during the query')
-        else console.log(`User updated`)
-    })
+    try {
+        db.query(`SELECT password FROM Users WHERE email = ?;`, [oldEmail], async (err, results, fields) => {
+            if (err) {
+                console.error('Error during the query:', err);
+                return res.status(500).send('Internal Server Error');
+            }else if(results.affectedRows == 1 && await bcrypt.compare(password, results[0].password)){
+                db.query(`UPDATE Users SET email = ? WHERE email = ?;`, [newEmail, oldEmail], (err, results, fields) => {
+                    if(results.affectedRows !== 1) res.status(400).json({result: 'Email or password wrong'});
+                    else if(err){
+                        res.status(500).json({result: 'Internal Server Error'});
+                        console.log('Error during the query')
+                    } 
+                    else res.status(200).json({result: 'User email updated'});
+                })
+            }else
+                res.status(400).json({result: 'Wrong credentials'});            
+        });
+    } catch (err) {
+        console.error('Error during password hashing:', err);
+        res.status(500).json({result: 'Internal Server Error'});
+    }
+    
 })
 
 router.delete('/deleteUser', (req, res) => {   
