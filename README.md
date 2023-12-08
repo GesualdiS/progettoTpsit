@@ -4,7 +4,7 @@ Compito di Tpsit di Simone Gesualdi con NodeJS.
 Scopo: creare un sito di messaggistica online che prende seriamente la privacy dei propri customers.
 Requisiti:
 - creare un account per ogni customer;
-- verificare la mail del signin;
+- verificare la mail del signin, [video](https://youtu.be/QDIOBsMBEI0?si=CsC0kRyFdx0yhj8E);
 - aggiungere la verifica a due fattori;
 - poter passare soldi a un amico;
 - usare cloudflare per connettersi al sito;
@@ -28,10 +28,9 @@ Funzionalità implementate fin'ora:
 - poter eliminare un utente;
 - cryptare la password quando arriva per poi salvarla nel database;
 
-Cose da fare
+Cose da fare:
+- front-end
+- gestione dei messaggi
 
 Note:
-- ho cambiato da or in and questa condizione
-    else if(results.affectedRows == 1 && await bcrypt.compare(oldPassword, results[0].password))
-  verificare che non dà errore a casa
-- verificare updateUserPassword;
+- cercare come usare nodemailer su stackoverflow

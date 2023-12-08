@@ -11,6 +11,7 @@ const {cryptPassword} = require(__dirname + '/../crypt')
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 router.use(bodyParser.json());
+const nodemailer = require('nodemailer')
 
 //   +-------------------------------------------------+
 //   |   I take the variables store in the file .env   |
@@ -19,8 +20,10 @@ router.use(bodyParser.json());
 const dbHost = process.env.DB_HOST;
 const dbPassword = process.env.DB_PASSWORD;
 const dbUser = process.env.DB_USER;
-const dbNome = process.env.DB_DATABASE;
+const dbName = process.env.DB_DATABASE;
 const apiKey = process.env.API_KEY;
+const emailName = process.env.EMAIL_NAME;
+const emailPassword = process.env.EMAIL_PASSWORD;
 
 //   +--------------------------------+
 //   |   We connect to the database   |
@@ -30,9 +33,30 @@ const db = mysql.createConnection({
     host: dbHost,
     user: dbUser,
     password: dbPassword,
-    database: dbNome
+    database: dbName
 });
 
+//   +-----------------------------------------------+
+//   |   Here I write the code for using the email   |
+//   +-----------------------------------------------+
+
+var transporter = nodemailer.createTransport({
+    service: "Gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // 465 the port if true
+    auth: {
+        user: emailName,
+        pass: emailPassword
+    }
+});
+
+transporter.verify((err, suc) => {
+    if(err)
+        console.log(err)
+    else
+        console.log('Ready for messages')
+})
 //   +--------------------------------------------------+
 //   |   I start to write the code for the web server   |
 //   +--------------------------------------------------+
@@ -62,10 +86,11 @@ router.put('/updateUserPassword', async (req, res) => {
     const {email, oldPassword, newPassword} = req.body
     try {
         db.query(`SELECT password FROM Users WHERE email = ?;`, [email], async (err, results, fields) => {
-            if (err) {
+            //you'll get error during the query if the email wasn't in the db
+            if (err || results.length === 0) {
                 console.error('Error during the query:', err);
-                return res.status(500).send('Internal Server Error');
-            }else if(results.affectedRows == 1 && await bcrypt.compare(oldPassword, results[0].password)){
+                res.status(500).send('Internal Server Error');
+            }else if(await bcrypt.compare(oldPassword, results[0].password)){
                 db.query(`UPDATE Users SET password = ? WHERE email = ?;`, [await cryptPassword(newPassword), email], (err, results, fields) => {
                     if(results.affectedRows !== 1) res.status(400).json({result: 'Email or password wrong'});
                     else if(err){
@@ -88,10 +113,11 @@ router.put('/updateUserEmail', async (req, res) => {
     const {oldEmail, newEmail, password} = req.body
     try {
         db.query(`SELECT password FROM Users WHERE email = ?;`, [oldEmail], async (err, results, fields) => {
-            if (err) {
+            //you'll get error during the query if the email wasn't in the db
+            if (err || results.length === 0) {
                 console.error('Error during the query:', err);
-                return res.status(500).send('Internal Server Error');
-            }else if(results.affectedRows == 1 && await bcrypt.compare(password, results[0].password)){
+                res.status(500).send('Internal Server Error');
+            }else if(await bcrypt.compare(password, results[0].password)){
                 db.query(`UPDATE Users SET email = ? WHERE email = ?;`, [newEmail, oldEmail], (err, results, fields) => {
                     if(results.affectedRows !== 1) res.status(400).json({result: 'Email or password wrong'});
                     else if(err){
@@ -106,17 +132,35 @@ router.put('/updateUserEmail', async (req, res) => {
     } catch (err) {
         console.error('Error during password hashing:', err);
         res.status(500).json({result: 'Internal Server Error'});
-    }
-    
+    }   
 })
 
 router.delete('/deleteUser', (req, res) => {   
     const {email, password} = req.body
-    db.query(`DELETE FROM Users WHERE email = ? AND password = ?;`, [email, password], (err, results, fields) => {
-        if(results.affectedRows !== 1) console.log(`User not found`)
-        else if(err) console.log('Error during the query')
-        else console.log(`User removed`)
-    })
+    try {
+        db.query(`SELECT password FROM Users WHERE email = ?;`, [email], async (err, results, fields) => {
+            //you'll get error during the query if the email wasn't in the db
+            if (err || results.length === 0) {
+                console.error('Error during the query:', err);
+                res.status(500).send('Internal Server Error');
+            }else if(await bcrypt.compare(password, results[0].password)){
+                db.query(`DELETE FROM Users WHERE email = ?;`, [email], (err, results, fields) => {
+                    if(err){
+                        console.log('Error during the query')
+                        res.status(500).json({result: 'Internal Server Error'});
+                    } 
+                    else{
+                        console.log(`User removed`)
+                        res.status(200).send('User removed');
+                    } 
+                })
+            }else
+                res.status(400).json({result: 'Wrong credentials'});            
+        });
+    } catch (err) {
+        console.error('Error during password hashing:', err);
+        res.status(500).json({result: 'Internal Server Error'});
+    }      
 })
 
 module.exports = router
