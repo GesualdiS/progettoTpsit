@@ -27,10 +27,15 @@ Funzionalità implementate fin'ora:
 - poter cambiare la password o la email dell'utente;
 - poter eliminare un utente;
 - cryptare la password quando arriva per poi salvarla nel database;
+- connettersi alla mail con nodemailer
 
 Cose da fare:
 - front-end
 - gestione dei messaggi
 
 Note:
-- cercare come usare nodemailer su stackoverflow
+- vedere utilizzo api key
+- https://github.com/validatorjs/validator.js implementarlo per verificare email e password;
+
+Cose che potrei scordamri:
+- in mail.js non serve verificare se il token corrisponde già a uno user, perchè viene mandato quando lo creiamo

@@ -6,24 +6,23 @@ const express = require('express')
 const mysql = require('mysql2')
 const router = express.Router()
 const bodyParser = require('body-parser');
-const e = require('express');
 const {cryptPassword} = require(__dirname + '/../crypt')
 require('dotenv').config();
 const bcrypt = require('bcrypt');
+const sendVerificationEmail = require('../mail');
 router.use(bodyParser.json());
-const nodemailer = require('nodemailer')
+
 
 //   +-------------------------------------------------+
 //   |   I take the variables store in the file .env   |
 //   +-------------------------------------------------+
 
+const serverHost = process.env.SERVER_HOST;
 const dbHost = process.env.DB_HOST;
 const dbPassword = process.env.DB_PASSWORD;
 const dbUser = process.env.DB_USER;
 const dbName = process.env.DB_DATABASE;
 const apiKey = process.env.API_KEY;
-const emailName = process.env.EMAIL_NAME;
-const emailPassword = process.env.EMAIL_PASSWORD;
 
 //   +--------------------------------+
 //   |   We connect to the database   |
@@ -36,27 +35,6 @@ const db = mysql.createConnection({
     database: dbName
 });
 
-//   +-----------------------------------------------+
-//   |   Here I write the code for using the email   |
-//   +-----------------------------------------------+
-
-var transporter = nodemailer.createTransport({
-    service: "Gmail",
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // 465 the port if true
-    auth: {
-        user: emailName,
-        pass: emailPassword
-    }
-});
-
-transporter.verify((err, suc) => {
-    if(err)
-        console.log(err)
-    else
-        console.log('Ready for messages')
-})
 //   +--------------------------------------------------+
 //   |   I start to write the code for the web server   |
 //   +--------------------------------------------------+
@@ -73,6 +51,7 @@ router.post('/createUser', async (req, res) => {
                 return res.status(500).send('Internal Server Error');
             }
             console.log(`insert user id: ${results.insertId}`);
+            sendVerificationEmail(email, results.insertId)
             res.status(200).json({result: 'User created successfully'});
         });
     } catch (err) {

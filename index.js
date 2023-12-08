@@ -3,7 +3,8 @@
 //   +-------------------------------------------------+
 
 const express = require('express')
-const api = require('./routes/api.js')
+const crud = require('./routes/api.js')
+const auth = require('./routes/auth.js')
 require('dotenv').config();
 const app = express()
 
@@ -19,6 +20,7 @@ const apiKey = process.env.API_KEY;
 //   +--------------------------------------------------+
 
 // I use the code that is stored in ./routes/api.js for the links under api/*
-app.use('/api', api)
+app.use('/api/crud', crud)
+app.use('/api/auth', auth)
 
 app.listen(port)

@@ -30,16 +30,15 @@ CREATE TABLE IF NOT EXISTS Users(
 
 -- A user who want to verify his account has to use the link in the table which refers to his account
 CREATE TABLE IF NOT EXISTS Verify_links(
-    id_team    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    password    VARCHAR(255), -- it can be NULL if the Team doesn't have a password
-    insert_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    update_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    id_verify_link BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_user        BIGINT UNIQUE REFERENCES Users(id_user) ON DELETE CASCADE ON UPDATE CASCADE,
+    token          VARCHAR(100), -- the string that the url has to match
+    insert_date    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_date    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS Teams(
-    id_team    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_team     BIGINT AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(100) NOT NULL,
     description VARCHAR(255) NOT NULL,
     password    VARCHAR(255), -- it can be NULL if the Team doesn't have a password
