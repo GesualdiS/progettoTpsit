@@ -40,9 +40,10 @@ const db = mysql.createConnection({
 //   +--------------------------------------------------+
 
 router.post('/createUser', async (req, res) => {
+    console.log(req.body)
     const { email, password, username } = req.body;
-    if(!email || !password || !username)
-        res.status(400).json({result: 'Error due the unreiceved data'});
+    if(!email || !password || !username || email == '' || username == '' || password == '')
+        return res.status(400).json({result: 'Error due the unreiceved data'});
     try {
         const hashedPassword = await cryptPassword(password)
         db.query(`INSERT INTO Users(email, password, username) VALUES(?, ?, ?);`, [email, hashedPassword, username], (err, results, fields) => {

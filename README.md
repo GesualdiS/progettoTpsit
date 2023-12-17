@@ -37,5 +37,5 @@ Note:
 - vedere utilizzo api key
 - https://github.com/validatorjs/validator.js implementarlo per verificare email e password;
 
-Cose che potrei scordamri:
+Cose che potrei scordarmi:
 - in mail.js non serve verificare se il token corrisponde già a uno user, perchè viene mandato quando lo creiamo
