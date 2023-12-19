@@ -65,9 +65,30 @@ router.get('/verifyEmail/:token', (req, res) => {
 
 });
 
+router.post('/login', (req, res) => {   
+    const {email, password} = req.body
+    try {
+        db.query(`SELECT password, has_verified FROM Users WHERE email = ?;`, [email], async (err, results, fields) => {
+            //you'll get error during the query if the email wasn't in the db
+            if (err || results.length === 0) {
+                console.error('Error during the query:', err);
+                res.status(500).send('Internal Server Error');
+            }else if(await bcrypt.compare(password, results[0].password)){
+                if(results[0].has_verified)
+                    return res.status(200).json({result: 'User logged in', user: results[0]});
+                else
+                    res.status(400).json({result: 'User not verified'});
+            }else
+                res.status(400).json({result: 'Wrong credentials'});            
+        });
+    } catch (err) {
+        console.error('Error during password hashing:', err);
+        res.status(500).json({result: 'Internal Server Error'});
+    }      
+})
+
 router.all('*', (req, res) => {
     console.log('here')
-
 });
 
 module.exports = router

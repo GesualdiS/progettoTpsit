@@ -84,12 +84,11 @@ function sendVerificationEmail(email, id){
         subject: 'Almost done!',
         html: `Click this <a href = 'http://${serverHost}:${port}/api/auth/verifyEmail/${token}'>link</a> in order to verify your email in our application. You've done so far, congratulations!`
     }, (err, info) => {
-        if (err)
-            return
-        console.log(info.envelope)
-        console.log(info.messageId)
+        if(err)
+            console.log(err)
+        else
+            console.log(info)
     });
-    
 }
 
 module.exports = sendVerificationEmail
