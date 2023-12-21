@@ -32,6 +32,7 @@ Funzionalità implementate fin'ora:
 Cose da fare:
 - front-end
 - gestione dei messaggi
+- gestione dei jwt;
 
 Note:
 - vedere utilizzo api key

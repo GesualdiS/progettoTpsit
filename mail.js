@@ -17,7 +17,7 @@ const dbHost = process.env.DB_HOST;
 const dbPassword = process.env.DB_PASSWORD;
 const dbUser = process.env.DB_USER;
 const dbName = process.env.DB_DATABASE;
-const apiKey = process.env.API_KEY;
+const privateKey = process.env.PRIVATE_KEY;
 const emailName = process.env.EMAIL_NAME;
 const emailPassword = process.env.EMAIL_PASSWORD;
 

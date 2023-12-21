@@ -32,7 +32,7 @@ app.use(cors({
 //   +-------------------------------------------------+
 
 const port = process.env.PORT || 3000;
-const apiKey = process.env.API_KEY;
+const privateKey = process.env.PRIVATE_KEY;
 
 //   +--------------------------------------------------+
 //   |   I start to write the code for the web server   |
