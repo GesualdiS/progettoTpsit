@@ -5,11 +5,12 @@
 const express = require('express')
 const mysql = require('mysql2')
 const router = express.Router()
-const bodyParser = require('body-parser');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
-router.use(bodyParser.json());
 const jwt = require('jsonwebtoken');
+const getTokens = require('../jwt');
+const refreshAccessToken = require('../jwt');
+
 
 
 //   +-------------------------------------------------+
@@ -21,7 +22,8 @@ const dbHost = process.env.DB_HOST;
 const dbPassword = process.env.DB_PASSWORD;
 const dbUser = process.env.DB_USER;
 const dbName = process.env.DB_DATABASE;
-const privateKey = process.env.PRIVATE_KEY;
+const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 
 
 //   +--------------------------------+
@@ -40,30 +42,36 @@ const db = mysql.createConnection({
 //   +--------------------------------------------------+
 
 router.get('/verifyEmail/:token', (req, res) => {
-    const {token} = req.params
-    db.query(`SELECT id_user, id_verify_link FROM Verify_links WHERE token = ?;`, [token], (err, results, fields) => {
-        //you'll get error during the query if the token wasn't in the db
-        if (err || results.length === 0) {
-            console.log(results.length)
-            console.error('Error during the query:', err);
-            res.status(500).send('Internal Server Error');
-        }else{
-            db.query(`UPDATE Users SET has_verified = ? WHERE id_user = ?;`, [1, results[0].id_user], (err, results, fields) => {
-                if(err){
-                    res.status(500).json({result: 'Internal Server Error'});
-                    console.log('Error during the query')
-                } 
-                else{
-                    db.query(`DELETE FROM Verify_links WHERE token = ?;`, [token], (err, results, fields) => {
-                       //here we had delete the row that contained that token 
-                    })
-                    jwt.sign({ email: 'bar' }, privateKey, { algorithm: 'RS256' }, function(err, token) {
-                        res.status(200).json({result: 'User verified', user: token});
-                    });
-        }
-    });
+    const { token } = req.params;
 
+    db.query(`SELECT id_user, id_verify_link FROM Verify_links WHERE token = ?;`, [token], (err, selectResults, fields) => {
+        if (err || selectResults.length === 0) {
+            console.error('Error during the query:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const userId = selectResults[0].id_user;
+
+        db.query(`UPDATE Users SET has_verified = ? WHERE id_user = ?;`, [1, userId], (err, updateResults, fields) => {
+            if (err) {
+                console.error('Error during the query:', err);
+                return res.status(500).json({ result: 'Internal Server Error' });
+            }
+
+            db.query(`DELETE FROM Verify_links WHERE token = ?;`, [token], (err, deleteResults, fields) => {
+                if (err) {
+                    console.error('Error during the query:', err);
+                }
+                const tokens = getTokens(userId)
+                if (tokens)
+                    res.status(200).json({ result: 'User verified', accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
+                else
+                    res.status(500).send('Internal Server Error')
+            });
+        });
+    });
 });
+
 
 router.post('/login', (req, res) => {   
     const {email, password} = req.body

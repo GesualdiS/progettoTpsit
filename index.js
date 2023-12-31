@@ -6,6 +6,8 @@ const express = require('express')
 const crud = require('./routes/api.js')
 const auth = require('./routes/auth.js')
 var cors = require('cors')
+const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
 require('dotenv').config();
 const app = express()
 // CORS headers for Angular app
@@ -20,19 +22,19 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
     next();
 });
-
 app.use(cors({
     origin: true,
     credentials: true,
     methods: 'POST,GET,PUT,OPTIONS,DELETE',
 }));
+app.use(express.json());
+app.use(bodyParser.json());
 
 //   +-------------------------------------------------+
 //   |   I take the variables store in the file .env   |
 //   +-------------------------------------------------+
 
 const port = process.env.PORT || 3000;
-const privateKey = process.env.PRIVATE_KEY;
 
 //   +--------------------------------------------------+
 //   |   I start to write the code for the web server   |
@@ -42,7 +44,7 @@ app.use('/api/crud', crud)
 app.use('/api/auth', auth)
 
 app.all('*', (req, res) => {
-    res.send('Page not found')
+    res.status(404).send('Page not found')
 })
 
 app.listen(port)

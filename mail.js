@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer')
 const { v4: uuidv4 } = require('uuid') // It generate unique string
 const mysql = require('mysql2')
 require('dotenv').config();
+const crypto = require('crypto')
 
 //   +-------------------------------------------------+
 //   |   I take the variables store in the file .env   |
@@ -17,7 +18,8 @@ const dbHost = process.env.DB_HOST;
 const dbPassword = process.env.DB_PASSWORD;
 const dbUser = process.env.DB_USER;
 const dbName = process.env.DB_DATABASE;
-const privateKey = process.env.PRIVATE_KEY;
+const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 const emailName = process.env.EMAIL_NAME;
 const emailPassword = process.env.EMAIL_PASSWORD;
 
@@ -72,7 +74,8 @@ function saveToken(token, id){
 
 //the token is the end part of the string 
 function sendVerificationEmail(email, id){
-    const token = uuidv4()
+    const token = crypto.randomBytes(32).toString('hex');
+    console.log(email)
     //if I didn't saved the token, I don't send the email and the user has to ask for receiving it
     saveToken(token, id)
     transporter.sendMail({

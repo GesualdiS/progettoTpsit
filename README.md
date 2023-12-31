@@ -30,9 +30,9 @@ Funzionalità implementate fin'ora:
 - connettersi alla mail con nodemailer
 
 Cose da fare:
-- front-end
-- gestione dei messaggi
-- gestione dei jwt;
+- front-end;
+- gestione dei messaggi;
+- salvare i jwt lato client;
 
 Note:
 - vedere utilizzo api key

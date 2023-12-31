@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS Users(
     update_date  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS User_tokens(
+    id_user_token     BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_user      BIGINT REFERENCES Users(id_user) ON UPDATE CASCADE ON DELETE RESTRICT,
+    refresh_token VARCHAR(255) UNIQUE,
+    insert_date  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_date  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- A user who want to verify his account has to use the link in the table which refers to his account
 CREATE TABLE IF NOT EXISTS Verify_links(
     id_verify_link BIGINT AUTO_INCREMENT PRIMARY KEY,

@@ -5,13 +5,10 @@
 const express = require('express')
 const mysql = require('mysql2')
 const router = express.Router()
-const bodyParser = require('body-parser');
 const {cryptPassword} = require(__dirname + '/../crypt')
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const sendVerificationEmail = require('../mail');
-router.use(bodyParser.json());
-
 
 //   +-------------------------------------------------+
 //   |   I take the variables store in the file .env   |
@@ -22,7 +19,8 @@ const dbHost = process.env.DB_HOST;
 const dbPassword = process.env.DB_PASSWORD;
 const dbUser = process.env.DB_USER;
 const dbName = process.env.DB_DATABASE;
-const privateKey = process.env.PRIVATE_KEY;
+const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 
 //   +--------------------------------+
 //   |   We connect to the database   |
