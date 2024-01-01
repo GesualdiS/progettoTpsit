@@ -33,6 +33,7 @@ Cose da fare:
 - front-end;
 - gestione dei messaggi;
 - salvare i jwt lato client;
+- aggiustare tutte le query usando il nuovo modulo pg;
 
 Note:
 - vedere utilizzo api key

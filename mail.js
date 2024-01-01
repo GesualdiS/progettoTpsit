@@ -4,7 +4,7 @@
 
 const nodemailer = require('nodemailer')
 const { v4: uuidv4 } = require('uuid') // It generate unique string
-const mysql = require('mysql2')
+const db = require('./database.js')
 require('dotenv').config();
 const crypto = require('crypto')
 
@@ -14,25 +14,8 @@ const crypto = require('crypto')
 
 const port = process.env.PORT;
 const serverHost = process.env.SERVER_HOST;
-const dbHost = process.env.DB_HOST;
-const dbPassword = process.env.DB_PASSWORD;
-const dbUser = process.env.DB_USER;
-const dbName = process.env.DB_DATABASE;
-const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 const emailName = process.env.EMAIL_NAME;
 const emailPassword = process.env.EMAIL_PASSWORD;
-
-//   +--------------------------------+
-//   |   We connect to the database   |
-//   +--------------------------------+
-
-const db = mysql.createConnection({
-    host: dbHost,
-    user: dbUser,
-    password: dbPassword,
-    database: dbName
-});
 
 //   +-----------------------------------------------+
 //   |   Here I write the code for using the email   |
@@ -62,12 +45,11 @@ transporter.verify((err, suc) => {
 //   +---------------------------------------------------------+
 
 function saveToken(token, id){
-    db.query(`INSERT INTO Verify_links(id_user, token) VALUES(?, ?);`, [id, token], (err, results, fields) => {
+    db.query(`INSERT INTO Verify_links(id_user, token) VALUES($1, $2);`, [id, token], (err, results, fields) => {
         if (err) {
             console.log(`error during the storing of the token`);
             return false
         }
-        console.log(`saved link in the db: ${results.insertId}`);
         return true
     });
 }

@@ -3,35 +3,12 @@
 //   +-------------------------------------------------+
 
 const express = require('express')
-const mysql = require('mysql2')
 const router = express.Router()
-const {cryptPassword} = require(__dirname + '/../crypt')
+const {cryptPassword} = require('../crypt')
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const sendVerificationEmail = require('../mail');
-
-//   +-------------------------------------------------+
-//   |   I take the variables store in the file .env   |
-//   +-------------------------------------------------+
-
-const serverHost = process.env.SERVER_HOST;
-const dbHost = process.env.DB_HOST;
-const dbPassword = process.env.DB_PASSWORD;
-const dbUser = process.env.DB_USER;
-const dbName = process.env.DB_DATABASE;
-const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
-
-//   +--------------------------------+
-//   |   We connect to the database   |
-//   +--------------------------------+
-
-const db = mysql.createConnection({
-    host: dbHost,
-    user: dbUser,
-    password: dbPassword,
-    database: dbName
-});
+const db = require('./../database.js')
 
 //   +--------------------------------------------------+
 //   |   I start to write the code for the web server   |
@@ -44,7 +21,7 @@ router.post('/createUser', async (req, res) => {
         return res.status(400).json({result: 'Error due the unreiceved data'});
     try {
         const hashedPassword = await cryptPassword(password)
-        db.query(`INSERT INTO Users(email, password, username) VALUES(?, ?, ?);`, [email, hashedPassword, username], (err, results, fields) => {
+        db.query(`INSERT INTO Users(email, password, username) VALUES($1, $2, $3);`, [email, hashedPassword, username], (err, results, fields) => {
             if (err) {
                 console.error('Error during the query:', err);
                 return res.status(500).send('Internal Server Error');
@@ -63,15 +40,14 @@ router.post('/createUser', async (req, res) => {
 router.put('/updateUserPassword', async (req, res) => {
     const {email, oldPassword, newPassword} = req.body
     try {
-        db.query(`SELECT password FROM Users WHERE email = ?;`, [email], async (err, results, fields) => {
+        db.query(`SELECT password FROM Users WHERE email = $1;`, [email], async (err, results, fields) => {
             //you'll get error during the query if the email wasn't in the db
-            if (err || results.length === 0) {
+            if (err || results.rowCount === 0) {
                 console.error('Error during the query:', err);
                 res.status(500).send('Internal Server Error');
-            }else if(await bcrypt.compare(oldPassword, results[0].password)){
-                db.query(`UPDATE Users SET password = ? WHERE email = ?;`, [await cryptPassword(newPassword), email], (err, results, fields) => {
-                    if(results.affectedRows !== 1) res.status(400).json({result: 'Email or password wrong'});
-                    else if(err){
+            }else if(await bcrypt.compare(oldPassword, results.rows[0].password)){
+                db.query(`UPDATE Users SET password = $1 WHERE email = $2;`, [await cryptPassword(newPassword), email], (err, results, fields) => {
+                    if(err){
                         res.status(500).json({result: 'Internal Server Error'});
                         console.log('Error during the query')
                     } 
@@ -90,17 +66,16 @@ router.put('/updateUserPassword', async (req, res) => {
 router.put('/updateUserEmail', async (req, res) => {
     const {oldEmail, newEmail, password} = req.body
     try {
-        db.query(`SELECT password FROM Users WHERE email = ?;`, [oldEmail], async (err, results, fields) => {
+        db.query(`SELECT password FROM Users WHERE email = $1;`, [oldEmail], async (err, results, fields) => {
             //you'll get error during the query if the email wasn't in the db
-            if (err || results.length === 0) {
+            if (err || results.rowCount === 0) {
                 console.error('Error during the query:', err);
                 res.status(500).send('Internal Server Error');
-            }else if(await bcrypt.compare(password, results[0].password)){
-                db.query(`UPDATE Users SET email = ? WHERE email = ?;`, [newEmail, oldEmail], (err, results, fields) => {
-                    if(results.affectedRows !== 1) res.status(400).json({result: 'Email or password wrong'});
-                    else if(err){
+            }else if(await bcrypt.compare(password, results.rows[0].password)){
+                db.query(`UPDATE Users SET email = $1, has_verified = false WHERE email = $2;`, [newEmail, oldEmail], (err, results, fields) => {
+                    if(err){
                         res.status(500).json({result: 'Internal Server Error'});
-                        console.log('Error during the query')
+                        console.log('Error during the query: ' + err)
                     } 
                     else res.status(200).json({result: 'User email updated'});
                 })
@@ -116,19 +91,18 @@ router.put('/updateUserEmail', async (req, res) => {
 router.delete('/deleteUser', (req, res) => {   
     const {email, password} = req.body
     try {
-        db.query(`SELECT password FROM Users WHERE email = ?;`, [email], async (err, results, fields) => {
+        db.query(`SELECT password FROM Users WHERE email = $1;`, [email], async (err, results, fields) => {
             //you'll get error during the query if the email wasn't in the db
             if (err || results.length === 0) {
                 console.error('Error during the query:', err);
                 res.status(500).send('Internal Server Error');
-            }else if(await bcrypt.compare(password, results[0].password)){
-                db.query(`DELETE FROM Users WHERE email = ?;`, [email], (err, results, fields) => {
+            }else if(await bcrypt.compare(password, results.rows[0].password)){
+                db.query(`DELETE FROM Users WHERE email = $1;`, [email], (err, results, fields) => {
                     if(err){
                         console.log('Error during the query')
                         res.status(500).json({result: 'Internal Server Error'});
                     } 
                     else{
-                        console.log(`User removed`)
                         res.status(200).send('User removed');
                     } 
                 })
