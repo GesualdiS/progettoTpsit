@@ -67,7 +67,7 @@ function sendVerificationEmail(email, id){
         },
         to: email,
         subject: 'Almost done!',
-        html: `Click this <a href = 'http://${serverHost}:${port}/api/auth/verifyEmail/${token}'>link</a> in order to verify your email in our application. You've done so far, congratulations!`
+        html: `Click this <a href = 'http://${serverHost}/api/auth/verifyEmail/${token}'>link</a> in order to verify your email in our application. You've done so far, congratulations!`
     }, (err, info) => {
         if(err)
             console.log(err)
