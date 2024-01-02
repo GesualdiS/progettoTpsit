@@ -51,7 +51,7 @@ router.post('/login', (req, res) => {
     const {email, password} = req.body
     try {
         db.query(`SELECT password, has_verified FROM Users WHERE email = ?;`, [email], async (err, results, fields) => {
-            if (err || results.length === 0) {
+            if (err || results.rowCount === 0) {
                 console.error('Error during the query:', err);
                 res.status(500).send('Internal Server Error');
             }else if(await bcrypt.compare(password, results[0].password)){
