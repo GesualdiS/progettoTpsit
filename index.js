@@ -44,7 +44,7 @@ app.use('/api/crud', crud)
 app.use('/api/auth', auth)
 
 app.all('*', (req, res) => {
-    res.status(404).send('Page not found, as if a parchment containing Petrarch\'s profound musings and timeless verses were misplaced within the boundless volumes of literature. In the intricate tapestry of human experience, the search for this lost page echoes the poet\'s relentless pursuit of unrequited love, weaving a narrative of longing and discovery across the corridors of time, awaiting the curious eyes that may one day stumble upon its poetic treasures')
+    res.status(404).send("Page not found, much like an undiscovered sonnet in the vast library of Petrarch's works, lost in the echoes of time.")
 })
 
 app.listen(port)
