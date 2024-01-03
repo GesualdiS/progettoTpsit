@@ -25,7 +25,7 @@ router.get('/verifyEmail/:token', (req, res) => {
         }
 
         const userId = results.rows[0].id_user;
-
+        
         db.query(`UPDATE Users SET has_verified = true WHERE id_user = $1;`, [userId], (err, results, fields) => {
             if (err) {
                 console.error('Error during the query:', err);

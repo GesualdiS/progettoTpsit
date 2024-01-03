@@ -26,8 +26,7 @@ router.post('/createUser', async (req, res) => {
                 console.error('Error during the query:', err);
                 return res.status(500).send('Internal Server Error');
             }
-            console.log(`insert user id: ${results.insertId}`);
-            sendVerificationEmail(email, results.insertId)
+            sendVerificationEmail(email, results.rows[0].insertId)
             res.status(200).json({result: 'User created successfully'});
         });
     } catch (err) {
